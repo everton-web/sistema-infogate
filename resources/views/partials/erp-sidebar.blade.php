@@ -36,8 +36,7 @@
             <span class="nav-icon">≣</span><span>Orçamentos</span>
         </a>
 
-        <a href="{{ route('service-orders.index') }}"
-           class="nav-item {{ request()->routeIs('service-orders.*') ? 'active' : '' }}">
+        <a href="#" class="nav-item nav-disabled" title="Módulo em desenvolvimento">
             <span class="nav-icon">⚙</span><span>Ordens de Serviço</span>
         </a>
 
