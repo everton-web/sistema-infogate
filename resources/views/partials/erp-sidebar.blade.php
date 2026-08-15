@@ -56,11 +56,13 @@
             <span class="nav-icon">◆</span><span>Veículos</span>
         </a>
 
-        <a href="#" class="nav-item nav-disabled" title="Módulo em desenvolvimento">
+        <a href="{{ route('products.index') }}"
+           class="nav-item {{ request()->routeIs('products.*') ? 'active' : '' }}">
             <span class="nav-icon">▤</span><span>Produtos / Serviços</span>
         </a>
 
-        <a href="#" class="nav-item nav-disabled" title="Módulo em desenvolvimento">
+        <a href="{{ route('suppliers.index') }}"
+           class="nav-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
             <span class="nav-icon">⌂</span><span>Fornecedores</span>
         </a>
 

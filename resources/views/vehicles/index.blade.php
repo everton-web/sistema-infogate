@@ -65,7 +65,7 @@
 
                 <tbody>
                     @foreach($vehicles as $vehicle)
-                        <tr>
+                        <tr class="clickable-row" onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
                             <td>
                                 <span class="plate-badge">{{ $vehicle->plate }}</span>
                             </td>
@@ -93,7 +93,11 @@
                             </td>
 
                             <td class="cell-right">
-                                <span class="status-chip status-active">Ativo</span>
+                                @if($vehicle->status === 'inactive')
+                                    <span class="status-chip status-inactive">Inativo</span>
+                                @else
+                                    <span class="status-chip status-active">Ativo</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

@@ -49,6 +49,105 @@ class VehicleController extends Controller
         );
     }
 
+    public function show(Vehicle $vehicle): View
+    {
+        $this->ensureCompany($vehicle);
+
+        $vehicle->load(['customer', 'brand', 'model']);
+
+        return view('vehicles.show', compact('vehicle'));
+    }
+
+    public function edit(Vehicle $vehicle): View
+    {
+        $this->ensureCompany($vehicle);
+
+        $company = app('currentCompany');
+
+        $customers = Customer::query()
+            ->where('company_id', $company->id)
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        $brands = VehicleBrand::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view(
+            'vehicles.edit',
+            compact('vehicle', 'customers', 'brands')
+        );
+    }
+
+    public function update(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        $this->ensureCompany($vehicle);
+
+        $company = app('currentCompany');
+
+        $plate = strtoupper(
+            preg_replace('/\s+/', '', trim((string) $request->input('plate')))
+        );
+
+        if (preg_match('/^[A-Z]{3}[0-9]{4}$/', $plate)) {
+            $plate = substr($plate, 0, 3) . '-' . substr($plate, 3);
+        }
+
+        if (
+            ! preg_match('/^[A-Z]{3}-[0-9]{4}$/', $plate)
+            && ! preg_match('/^[A-Z]{3}[0-9][A-Z][0-9]{2}$/', $plate)
+        ) {
+            return back()
+                ->withErrors(['plate' => 'Informe uma placa brasileira válida: ABC-1234 ou ABC1D23.'])
+                ->withInput();
+        }
+
+        $request->merge(['plate' => $plate]);
+
+        $validated = $request->validate([
+            'customer_id' => [
+                'required',
+                Rule::exists('customers', 'id')
+                    ->where(fn ($query) => $query->where('company_id', $company->id)),
+            ],
+            'vehicle_brand_id' => ['required', 'integer', 'exists:vehicle_brands,id'],
+            'vehicle_model_id' => ['required', 'integer', 'exists:vehicle_models,id'],
+            'plate' => [
+                'required', 'string', 'max:8',
+                Rule::unique('vehicles', 'plate')
+                    ->where(fn ($query) => $query->where('company_id', $company->id))
+                    ->ignore($vehicle->id),
+            ],
+            'version' => ['nullable', 'string', 'max:120'],
+            'year_manufacture' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'year_model' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 2)],
+            'color' => ['nullable', 'string', 'max:50'],
+            'chassis' => ['nullable', 'string', 'max:30'],
+            'odometer' => ['nullable', 'integer', 'min:0'],
+            'notes' => ['nullable', 'string'],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
+        ]);
+
+        $modelIsValid = VehicleModel::query()
+            ->where('id', $validated['vehicle_model_id'])
+            ->where('vehicle_brand_id', $validated['vehicle_brand_id'])
+            ->exists();
+
+        if (! $modelIsValid) {
+            return back()
+                ->withErrors(['vehicle_model_id' => 'O modelo selecionado não pertence à marca informada.'])
+                ->withInput();
+        }
+
+        $vehicle->update($validated);
+
+        return redirect()
+            ->route('vehicles.show', $vehicle)
+            ->with('success', 'Veículo atualizado com sucesso.');
+    }
+
     public function models(VehicleBrand $brand): JsonResponse
     {
         $models = VehicleModel::query()
@@ -281,5 +380,13 @@ class VehicleController extends Controller
                 'success',
                 'Veículo cadastrado com sucesso.'
             );
+    }
+
+    private function ensureCompany(Vehicle $vehicle): void
+    {
+        abort_unless(
+            (int) $vehicle->company_id === (int) app('currentCompany')->id,
+            404
+        );
     }
 }

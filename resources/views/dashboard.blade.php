@@ -1,4 +1,3 @@
-\
 @extends('layouts.erp')
 
 @section('title', 'Dashboard')
@@ -14,69 +13,69 @@
     </div>
 
     <div class="page-actions">
-        <a href="{{ route('vehicles.create') }}" class="btn btn-secondary">
-            + Novo veículo
+        <a href="{{ route('customers.create') }}" class="btn btn-secondary">
+            + Novo cliente
         </a>
 
-        <button type="button" class="btn btn-primary" disabled title="Em desenvolvimento">
-            Nova venda
-        </button>
+        <a href="{{ route('vehicles.create') }}" class="btn btn-primary">
+            + Novo veículo
+        </a>
     </div>
 </div>
 
 <section class="metric-grid">
     <article class="metric-card">
-        <span class="metric-label">Vendas pagas hoje</span>
-        <strong class="metric-value success">R$ 0,00</strong>
-        <small>Movimento do dia</small>
+        <span class="metric-label">Clientes ativos</span>
+        <strong class="metric-value success">{{ $activeCustomers }}</strong>
+        <small>de {{ $totalCustomers }} cadastrados</small>
     </article>
 
     <article class="metric-card">
-        <span class="metric-label">Vendas no mês</span>
-        <strong class="metric-value">R$ 0,00</strong>
-        <small>Total bruto registrado</small>
+        <span class="metric-label">Veículos</span>
+        <strong class="metric-value">{{ $totalVehicles }}</strong>
+        <small>Total cadastrado</small>
     </article>
 
     <article class="metric-card">
         <span class="metric-label">OS em aberto</span>
-        <strong class="metric-value warning">0</strong>
-        <small>Abertas, aguardando ou em execução</small>
+        <strong class="metric-value muted-value">—</strong>
+        <small>Módulo em desenvolvimento</small>
     </article>
 
     <article class="metric-card">
         <span class="metric-label">Caixa</span>
-        <strong class="metric-value muted-value">Não iniciado</strong>
-        <small>Módulo de caixa será ativado depois</small>
+        <strong class="metric-value muted-value">—</strong>
+        <small>Módulo em desenvolvimento</small>
     </article>
 
     <article class="metric-card">
         <span class="metric-label">A receber</span>
-        <strong class="metric-value warning">R$ 0,00</strong>
-        <small>Lançamentos pendentes</small>
+        <strong class="metric-value muted-value">—</strong>
+        <small>Módulo em desenvolvimento</small>
     </article>
 
     <article class="metric-card">
         <span class="metric-label">A pagar</span>
-        <strong class="metric-value danger">R$ 0,00</strong>
-        <small>Lançamentos pendentes</small>
+        <strong class="metric-value muted-value">—</strong>
+        <small>Módulo em desenvolvimento</small>
     </article>
 
     <article class="metric-card">
         <span class="metric-label">Estoque baixo</span>
-        <strong class="metric-value danger">0</strong>
-        <small>Produtos no mínimo ou abaixo</small>
+        <strong class="metric-value muted-value">—</strong>
+        <small>Módulo em desenvolvimento</small>
     </article>
 
     <article class="metric-card quick-card">
         <span class="metric-label">Acesso rápido</span>
         <div class="quick-actions">
+            <a href="{{ route('customers.create') }}" class="quick-btn">
+                Novo cliente
+            </a>
+
             <a href="{{ route('vehicles.create') }}" class="quick-btn">
                 Novo veículo
             </a>
-
-            <button type="button" class="quick-btn muted" disabled>
-                Nova OS
-            </button>
         </div>
     </article>
 </section>
@@ -84,13 +83,13 @@
 <section class="dashboard-section">
     <div class="section-header">
         <div>
-            <h2>Serviços / instalações de hoje</h2>
-            <p>Agenda operacional da filial.</p>
+            <h2>Últimos clientes cadastrados</h2>
+            <p>Os 5 clientes mais recentes.</p>
         </div>
 
-        <button type="button" class="btn btn-light" disabled>
-            Ver ordens
-        </button>
+        <a href="{{ route('customers.index') }}" class="btn btn-light">
+            Ver todos
+        </a>
     </div>
 
     <div class="table-card">
@@ -98,20 +97,33 @@
             <table class="erp-table">
                 <thead>
                     <tr>
-                        <th>Horário</th>
-                        <th>OS</th>
-                        <th>Cliente</th>
-                        <th>Veículo</th>
-                        <th>Técnico</th>
-                        <th>Status</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Telefone</th>
+                        <th>Cidade</th>
+                        <th>Situação</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="empty-row">
-                        <td colspan="6">
-                            Nenhum serviço agendado para hoje.
-                        </td>
-                    </tr>
+                    @forelse($recentCustomers as $customer)
+                        <tr class="clickable-row" onclick="window.location='{{ route('customers.show', $customer) }}'">
+                            <td><strong>{{ $customer->name }}</strong></td>
+                            <td>{{ $customer->type === 'pj' ? 'PJ' : 'PF' }}</td>
+                            <td>{{ $customer->phone ?: '—' }}</td>
+                            <td>{{ $customer->city ? $customer->city . '/' . $customer->state : '—' }}</td>
+                            <td>
+                                @if($customer->status === 'inactive')
+                                    <span class="status-pill neutral-pill">Inativo</span>
+                                @else
+                                    <span class="status-pill success-pill">Ativo</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr class="empty-row">
+                            <td colspan="5">Nenhum cliente cadastrado ainda.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -121,12 +133,12 @@
 <section class="dashboard-section">
     <div class="section-header">
         <div>
-            <h2>Últimas movimentações</h2>
-            <p>Começaremos pelos veículos cadastrados na Canal Som.</p>
+            <h2>Últimos veículos cadastrados</h2>
+            <p>Os 5 veículos mais recentes.</p>
         </div>
 
         <a href="{{ route('vehicles.index') }}" class="btn btn-light">
-            Ver veículos
+            Ver todos
         </a>
     </div>
 
@@ -135,27 +147,27 @@
             <table class="erp-table">
                 <thead>
                     <tr>
-                        <th>Módulo</th>
-                        <th>Situação</th>
-                        <th>Próximo teste</th>
+                        <th>Placa</th>
+                        <th>Cliente</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Ano</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>Veículos</strong></td>
-                        <td><span class="status-pill success-pill">Ativo</span></td>
-                        <td>Cadastro, marca/modelo FIPE e listagem</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Clientes</strong></td>
-                        <td><span class="status-pill waiting-pill">Próximo</span></td>
-                        <td>Cadastro completo e vínculo com veículos</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OS / PDV / Estoque</strong></td>
-                        <td><span class="status-pill neutral-pill">Planejado</span></td>
-                        <td>Ativar após homologarmos os cadastros</td>
-                    </tr>
+                    @forelse($recentVehicles as $vehicle)
+                        <tr class="clickable-row" onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
+                            <td><span class="plate-badge">{{ $vehicle->plate }}</span></td>
+                            <td><strong>{{ $vehicle->customer?->name ?? '—' }}</strong></td>
+                            <td>{{ $vehicle->brand?->name ?? '—' }}</td>
+                            <td>{{ $vehicle->model?->name ?? '—' }}</td>
+                            <td>{{ $vehicle->year_manufacture ?? '—' }}</td>
+                        </tr>
+                    @empty
+                        <tr class="empty-row">
+                            <td colspan="5">Nenhum veículo cadastrado ainda.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
