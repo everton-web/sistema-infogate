@@ -70,12 +70,10 @@ return new class extends Migration
          * Placa antiga com hífen possui 8 caracteres:
          * ABC-1234.
          */
-        if (DB::getDriverName() !== 'sqlite') {
-            DB::statement(
-                "ALTER TABLE `vehicles`
-                 MODIFY `plate` VARCHAR(8) NOT NULL"
-            );
-        }
+        DB::statement(
+            "ALTER TABLE `vehicles`
+             MODIFY `plate` VARCHAR(8) NOT NULL"
+        );
     }
 
     public function down(): void
