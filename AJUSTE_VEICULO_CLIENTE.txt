@@ -1,0 +1,21 @@
+AJUSTE OPCIONAL RECOMENDADO - PRÉ-SELECIONAR CLIENTE AO CRIAR VEÍCULO
+======================================================================
+
+No VehicleController, método create(), a view já recebe $customers e $brands.
+Não é necessário alterar o controller.
+
+Em:
+resources/views/vehicles/create.blade.php
+
+Encontre o option de cliente:
+
+<option
+    value="{{ $customer->id }}"
+    @selected(old('customer_id') == $customer->id)
+>
+
+Troque APENAS a linha @selected por:
+
+@selected(old('customer_id', request('customer_id')) == $customer->id)
+
+Assim, ao clicar "+ Novo veículo" dentro de um cliente, ele já chegará selecionado.

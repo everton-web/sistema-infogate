@@ -1,0 +1,28 @@
+PASSO 1 - IMPORT DO CONTROLLER
+==============================
+No início de routes/web.php, junto dos outros "use", adicione:
+
+use App\Http\Controllers\CustomerController;
+
+
+PASSO 2 - ROTAS
+===============
+DENTRO do grupo que já possui:
+
+Route::middleware(['auth', 'company'])->group(function () {
+
+adicione estas rotas:
+
+Route::prefix('cadastros/clientes')->name('customers.')->group(function () {
+    Route::get('/', [CustomerController::class, 'index'])->name('index');
+    Route::get('/novo', [CustomerController::class, 'create'])->name('create');
+    Route::post('/', [CustomerController::class, 'store'])->name('store');
+    Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+    Route::get('/{customer}/editar', [CustomerController::class, 'edit'])->name('edit');
+    Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
+});
+
+IMPORTANTE:
+- Não coloque essas rotas fora do grupo auth/company.
+- Não substitua routes/web.php inteiro.
+- Não use Route::resource adicional para customers, pois essas rotas já cobrem o módulo.

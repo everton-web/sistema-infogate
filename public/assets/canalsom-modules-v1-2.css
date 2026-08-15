@@ -1,0 +1,49 @@
+\
+/* ===== Ajuste Veículos v1.2 ===== */
+/* Ordem nova: Marca + Modelo na primeira linha; Placa + Ano na segunda */
+
+.vehicle-main-grid {
+    margin-top: 4px;
+    margin-bottom: 16px;
+}
+
+.vehicle-secondary-grid {
+    margin-top: 4px;
+}
+
+.vehicle-compact-row {
+    display: grid;
+    grid-template-columns: minmax(240px, 360px) 120px;
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 16px;
+}
+
+.vehicle-plate-field input {
+    max-width: 360px;
+}
+
+.vehicle-year-field {
+    max-width: 120px;
+}
+
+.vehicle-year-field input {
+    width: 100%;
+    text-align: center;
+    letter-spacing: .5px;
+}
+
+@media (max-width: 700px) {
+    .vehicle-compact-row,
+    .vehicle-main-grid,
+    .vehicle-secondary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vehicle-plate-field input,
+    .vehicle-year-field,
+    .vehicle-year-field input {
+        max-width: none;
+        width: 100%;
+    }
+}
