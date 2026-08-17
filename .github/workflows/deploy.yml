@@ -28,6 +28,21 @@ jobs:
           npm ci
           npm run build
 
+      - name: Create production .env
+        run: echo "${{ secrets.DOTENV_PRODUCTION }}" > .env
+
+      - name: Create SQLite database
+        run: touch database/database.sqlite
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Cache config and routes
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -39,8 +54,5 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
-            .env
             storage/logs/**
-            storage/framework/cache/**
             storage/framework/sessions/**
-            storage/framework/views/**
