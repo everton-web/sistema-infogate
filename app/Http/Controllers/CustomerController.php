@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class CustomerController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $companyId = session('current_company_id');
 
@@ -40,15 +43,21 @@ class CustomerController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('customers.index', compact('customers', 'search', 'status'));
+        return Inertia::render('Customers/Index', [
+            'customers' => $customers,
+            'filters' => [
+                'q' => $search,
+                'status' => $status,
+            ],
+        ]);
     }
 
-    public function create()
+    public function create(): Response
     {
-        return view('customers.create');
+        return Inertia::render('Customers/Create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $companyId = session('current_company_id');
 
@@ -70,7 +79,7 @@ class CustomerController extends Controller
             ->with('success', 'Cliente cadastrado com sucesso.');
     }
 
-    public function show(Customer $customer)
+    public function show(Customer $customer): Response
     {
         $this->ensureCompany($customer);
 
@@ -80,17 +89,21 @@ class CustomerController extends Controller
             },
         ]);
 
-        return view('customers.show', compact('customer'));
+        return Inertia::render('Customers/Show', [
+            'customer' => $customer,
+        ]);
     }
 
-    public function edit(Customer $customer)
+    public function edit(Customer $customer): Response
     {
         $this->ensureCompany($customer);
 
-        return view('customers.edit', compact('customer'));
+        return Inertia::render('Customers/Edit', [
+            'customer' => $customer,
+        ]);
     }
 
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, Customer $customer): RedirectResponse
     {
         $this->ensureCompany($customer);
 
