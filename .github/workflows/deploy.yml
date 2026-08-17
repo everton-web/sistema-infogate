@@ -34,7 +34,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /gestao.infogate.com.br/
+          server-dir: /everton-infogate/
           exclude: |
             **/.git*
             **/.git*/**
