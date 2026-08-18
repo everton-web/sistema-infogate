@@ -29,7 +29,9 @@ jobs:
           npm run build
 
       - name: Create production .env
-        run: echo "${{ secrets.DOTENV_PRODUCTION }}" > .env
+        env:
+          DOTENV: ${{ secrets.DOTENV_PRODUCTION }}
+        run: printf '%s\n' "$DOTENV" > .env
 
       - name: Create SQLite database
         run: touch database/database.sqlite
