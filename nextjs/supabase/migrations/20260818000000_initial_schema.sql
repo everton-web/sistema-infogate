@@ -5,7 +5,7 @@ create type public.record_status as enum ('active', 'inactive');
 create type public.person_type as enum ('pf', 'pj');
 create type public.item_type as enum ('product', 'service');
 create type public.stock_movement_type as enum ('entry', 'exit', 'adjustment');
-create type public.payment_method as enum ('cash', 'credit_card', 'debit_card', 'pix', 'boleto', 'other');
+create type public.payment_method as enum ('cash', 'credit_card', 'debit_card', 'pix', 'boleto', 'transfer', 'other');
 create type public.service_order_status as enum ('draft', 'open', 'in_progress', 'completed', 'cancelled');
 create type public.sale_status as enum ('open', 'completed', 'cancelled');
 create type public.quote_status as enum ('draft', 'sent', 'approved', 'rejected', 'expired');

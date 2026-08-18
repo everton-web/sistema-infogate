@@ -1,0 +1,2 @@
+"use server";import{redirect}from"next/navigation";import{createClient}from"@/lib/supabase/server";
+export async function bootstrapCompany(formData:FormData){const name=String(formData.get("name")??"").trim();const slug=String(formData.get("slug")??"").trim().toLowerCase();const supabase=await createClient();const{error}=await supabase.rpc("bootstrap_company",{company_name:name,company_slug:slug});if(error)redirect(`/sem-empresa?erro=${encodeURIComponent(error.message)}`);redirect("/")}
