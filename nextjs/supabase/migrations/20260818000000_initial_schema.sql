@@ -392,3 +392,9 @@ do $$ declare child text; parent text; fk text; begin
     execute format('create policy %I on public.%I for delete to authenticated using(exists(select 1 from public.%I p where p.id = %I and public.has_company_role(p.company_id, array[''owner'',''admin'']::user_role[])))', child || '_admin_delete', child, parent, fk);
   end loop;
 end $$;
+
+-- Expose application tables to authenticated Data API clients. RLS policies
+-- above remain the authority for which tenant rows each user can access.
+revoke all on all tables in schema public from anon;
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
