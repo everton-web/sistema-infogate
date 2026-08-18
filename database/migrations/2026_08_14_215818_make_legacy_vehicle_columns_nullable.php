@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -9,17 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         if (Schema::hasColumn('vehicles', 'brand')) {
-            DB::statement("
-                ALTER TABLE `vehicles`
-                MODIFY `brand` VARCHAR(80) NULL
-            ");
+            Schema::table('vehicles', function (Blueprint $table) {
+                $table->string('brand', 80)->nullable()->change();
+            });
         }
 
         if (Schema::hasColumn('vehicles', 'model')) {
-            DB::statement("
-                ALTER TABLE `vehicles`
-                MODIFY `model` VARCHAR(120) NULL
-            ");
+            Schema::table('vehicles', function (Blueprint $table) {
+                $table->string('model', 120)->nullable()->change();
+            });
         }
     }
 

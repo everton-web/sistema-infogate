@@ -12,10 +12,6 @@ return new class extends Migration
         $hasBrand = Schema::hasColumn('vehicles', 'brand');
         $hasModel = Schema::hasColumn('vehicles', 'model');
 
-        /*
-         * Verifica se existe algum dado antigo antes
-         * de remover as colunas legadas.
-         */
         $hasLegacyData = false;
 
         if ($hasBrand) {
@@ -47,33 +43,22 @@ return new class extends Migration
                 });
             }
         } else {
-            /*
-             * Se houver registros antigos, preserva os dados,
-             * mas deixa as colunas opcionais.
-             */
             if ($hasBrand) {
-                DB::statement(
-                    "ALTER TABLE `vehicles`
-                     MODIFY `brand` VARCHAR(80) NULL"
-                );
+                Schema::table('vehicles', function (Blueprint $table) {
+                    $table->string('brand', 80)->nullable()->change();
+                });
             }
 
             if ($hasModel) {
-                DB::statement(
-                    "ALTER TABLE `vehicles`
-                     MODIFY `model` VARCHAR(120) NULL"
-                );
+                Schema::table('vehicles', function (Blueprint $table) {
+                    $table->string('model', 120)->nullable()->change();
+                });
             }
         }
 
-        /*
-         * Placa antiga com hífen possui 8 caracteres:
-         * ABC-1234.
-         */
-        DB::statement(
-            "ALTER TABLE `vehicles`
-             MODIFY `plate` VARCHAR(8) NOT NULL"
-        );
+        Schema::table('vehicles', function (Blueprint $table) {
+            $table->string('plate', 8)->change();
+        });
     }
 
     public function down(): void
