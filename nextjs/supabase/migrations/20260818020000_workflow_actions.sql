@@ -63,6 +63,10 @@ begin
   end if;
 end $$;
 
+revoke execute on function public.pay_financial_entry(uuid,numeric,date,public.payment_method) from public, anon, authenticated;
+revoke execute on function public.close_cash_register(uuid,numeric,text) from public, anon, authenticated;
+revoke execute on function public.add_cash_transaction(uuid,public.cash_transaction_type,text,numeric,public.payment_method) from public, anon, authenticated;
+revoke execute on function public.update_document_status(text,uuid,text) from public, anon, authenticated;
 grant execute on function public.pay_financial_entry(uuid,numeric,date,public.payment_method) to authenticated;
 grant execute on function public.close_cash_register(uuid,numeric,text) to authenticated;
 grant execute on function public.add_cash_transaction(uuid,public.cash_transaction_type,text,numeric,public.payment_method) to authenticated;

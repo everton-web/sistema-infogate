@@ -63,4 +63,5 @@ begin
   end if;
   return document_id;
 end $$;
+revoke execute on function public.create_business_document(text,uuid,jsonb,jsonb) from public, anon, authenticated;
 grant execute on function public.create_business_document(text,uuid,jsonb,jsonb) to authenticated;

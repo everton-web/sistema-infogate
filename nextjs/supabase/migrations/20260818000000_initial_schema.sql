@@ -244,6 +244,48 @@ create table public.cash_register_transactions (
   created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 
+-- PostgreSQL não cria índices automaticamente para chaves estrangeiras.
+create index branches_company_id_idx on public.branches(company_id);
+create index company_users_user_id_idx on public.company_users(user_id) where is_active;
+create index branch_users_user_id_idx on public.branch_users(user_id) where is_active;
+create index customers_company_name_idx on public.customers(company_id, name);
+create index vehicles_customer_id_idx on public.vehicles(customer_id);
+create index vehicles_brand_id_idx on public.vehicles(vehicle_brand_id);
+create index vehicles_model_id_idx on public.vehicles(vehicle_model_id);
+create index products_company_type_status_idx on public.products(company_id, type, status);
+create index suppliers_company_name_idx on public.suppliers(company_id, name);
+create index service_orders_company_status_idx on public.service_orders(company_id, status, created_at desc);
+create index service_orders_customer_id_idx on public.service_orders(customer_id);
+create index service_orders_vehicle_id_idx on public.service_orders(vehicle_id);
+create index service_orders_branch_id_idx on public.service_orders(branch_id);
+create index service_order_items_order_id_idx on public.service_order_items(service_order_id);
+create index service_order_items_product_id_idx on public.service_order_items(product_id);
+create index stock_movements_product_created_idx on public.stock_movements(product_id, created_at desc);
+create index sales_company_created_idx on public.sales(company_id, created_at desc);
+create index sales_customer_id_idx on public.sales(customer_id);
+create index sales_branch_id_idx on public.sales(branch_id);
+create index sales_user_id_idx on public.sales(user_id);
+create index sale_items_sale_id_idx on public.sale_items(sale_id);
+create index sale_items_product_id_idx on public.sale_items(product_id);
+create index quotes_company_created_idx on public.quotes(company_id, created_at desc);
+create index quotes_customer_id_idx on public.quotes(customer_id);
+create index quotes_vehicle_id_idx on public.quotes(vehicle_id);
+create index quote_items_quote_id_idx on public.quote_items(quote_id);
+create index quote_items_product_id_idx on public.quote_items(product_id);
+create index warranties_customer_id_idx on public.warranties(customer_id);
+create index warranties_vehicle_id_idx on public.warranties(vehicle_id);
+create index warranties_service_order_id_idx on public.warranties(service_order_id);
+create index purchases_company_created_idx on public.purchases(company_id, created_at desc);
+create index purchases_supplier_id_idx on public.purchases(supplier_id);
+create index purchase_items_purchase_id_idx on public.purchase_items(purchase_id);
+create index purchase_items_product_id_idx on public.purchase_items(product_id);
+create index financial_entries_company_due_idx on public.financial_entries(company_id, type, status, due_date);
+create index financial_entries_customer_id_idx on public.financial_entries(customer_id);
+create index financial_entries_supplier_id_idx on public.financial_entries(supplier_id);
+create index cash_registers_branch_id_idx on public.cash_registers(branch_id);
+create index cash_registers_user_id_idx on public.cash_registers(user_id);
+create index cash_register_transactions_register_id_idx on public.cash_register_transactions(cash_register_id);
+
 create or replace function public.touch_updated_at() returns trigger language plpgsql as $$
 begin new.updated_at = now(); return new; end $$;
 
@@ -292,32 +334,45 @@ begin
   return movement_id;
 end $$;
 
+-- PostgreSQL concede EXECUTE a PUBLIC por padrão. Estas funções privilegiadas
+-- só podem ser chamadas pelos papéis explicitamente necessários.
+revoke execute on function public.touch_updated_at() from public, anon, authenticated;
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+revoke execute on function public.is_company_member(uuid) from public, anon, authenticated;
+revoke execute on function public.has_company_role(uuid, public.user_role[]) from public, anon, authenticated;
+revoke execute on function public.next_document_number(uuid, text) from public, anon, authenticated;
+revoke execute on function public.register_stock_movement(uuid, uuid, public.stock_movement_type, numeric, text) from public, anon, authenticated;
+grant execute on function public.is_company_member(uuid) to authenticated;
+grant execute on function public.has_company_role(uuid, public.user_role[]) to authenticated;
+grant execute on function public.next_document_number(uuid, text) to authenticated;
+grant execute on function public.register_stock_movement(uuid, uuid, public.stock_movement_type, numeric, text) to authenticated;
+
 alter table public.profiles enable row level security;
-create policy "profiles_read_self" on public.profiles for select using(id = auth.uid());
-create policy "profiles_update_self" on public.profiles for update using(id = auth.uid()) with check(id = auth.uid());
+create policy "profiles_read_self" on public.profiles for select to authenticated using(id = (select auth.uid()));
+create policy "profiles_update_self" on public.profiles for update to authenticated using(id = (select auth.uid())) with check(id = (select auth.uid()));
 
 alter table public.companies enable row level security;
-create policy "companies_member_read" on public.companies for select using(public.is_company_member(id));
-create policy "companies_admin_update" on public.companies for update using(public.has_company_role(id, array['owner','admin']::user_role[]));
+create policy "companies_member_read" on public.companies for select to authenticated using(public.is_company_member(id));
+create policy "companies_admin_update" on public.companies for update to authenticated using(public.has_company_role(id, array['owner','admin']::user_role[])) with check(public.has_company_role(id, array['owner','admin']::user_role[]));
 
 alter table public.company_users enable row level security;
-create policy "company_users_member_read" on public.company_users for select using(public.is_company_member(company_id));
-create policy "company_users_admin_write" on public.company_users for all using(public.has_company_role(company_id, array['owner','admin']::user_role[])) with check(public.has_company_role(company_id, array['owner','admin']::user_role[]));
+create policy "company_users_member_read" on public.company_users for select to authenticated using(public.is_company_member(company_id));
+create policy "company_users_admin_write" on public.company_users for all to authenticated using(public.has_company_role(company_id, array['owner','admin']::user_role[])) with check(public.has_company_role(company_id, array['owner','admin']::user_role[]));
 
 do $$ declare t text; begin
   foreach t in array array['branches','company_settings','customers','vehicles','products','suppliers','service_orders','stock_movements','sales','quotes','warranties','purchases','financial_entries','cash_registers','document_counters']
   loop
     execute format('alter table public.%I enable row level security', t);
-    execute format('create policy %I on public.%I for select using(public.is_company_member(company_id))', t || '_member_read', t);
-    execute format('create policy %I on public.%I for insert with check(public.is_company_member(company_id))', t || '_member_insert', t);
-    execute format('create policy %I on public.%I for update using(public.is_company_member(company_id)) with check(public.is_company_member(company_id))', t || '_member_update', t);
-    execute format('create policy %I on public.%I for delete using(public.has_company_role(company_id, array[''owner'',''admin'']::user_role[]))', t || '_admin_delete', t);
+    execute format('create policy %I on public.%I for select to authenticated using(public.is_company_member(company_id))', t || '_member_read', t);
+    execute format('create policy %I on public.%I for insert to authenticated with check(public.is_company_member(company_id))', t || '_member_insert', t);
+    execute format('create policy %I on public.%I for update to authenticated using(public.is_company_member(company_id)) with check(public.is_company_member(company_id))', t || '_member_update', t);
+    execute format('create policy %I on public.%I for delete to authenticated using(public.has_company_role(company_id, array[''owner'',''admin'']::user_role[]))', t || '_admin_delete', t);
   end loop;
 end $$;
 
 alter table public.branch_users enable row level security;
-create policy "branch_users_member_read" on public.branch_users for select using(exists(select 1 from public.branches b where b.id = branch_id and public.is_company_member(b.company_id)));
-create policy "branch_users_admin_write" on public.branch_users for all using(exists(select 1 from public.branches b where b.id = branch_id and public.has_company_role(b.company_id, array['owner','admin']::user_role[]))) with check(exists(select 1 from public.branches b where b.id = branch_id and public.has_company_role(b.company_id, array['owner','admin']::user_role[])));
+create policy "branch_users_member_read" on public.branch_users for select to authenticated using(exists(select 1 from public.branches b where b.id = branch_id and public.is_company_member(b.company_id)));
+create policy "branch_users_admin_write" on public.branch_users for all to authenticated using(exists(select 1 from public.branches b where b.id = branch_id and public.has_company_role(b.company_id, array['owner','admin']::user_role[]))) with check(exists(select 1 from public.branches b where b.id = branch_id and public.has_company_role(b.company_id, array['owner','admin']::user_role[])));
 
 alter table public.vehicle_brands enable row level security;
 alter table public.vehicle_models enable row level security;
@@ -331,12 +386,9 @@ do $$ declare child text; parent text; fk text; begin
     ('cash_register_transactions','cash_registers','cash_register_id')
   loop
     execute format('alter table public.%I enable row level security', child);
-    execute format('create policy %I on public.%I for select using(exists(select 1 from public.%I p where p.id = %I and public.is_company_member(p.company_id)))', child || '_member_read', child, parent, fk);
-    execute format('create policy %I on public.%I for insert with check(exists(select 1 from public.%I p where p.id = %I and public.is_company_member(p.company_id)))', child || '_member_insert', child, parent, fk);
-    execute format('create policy %I on public.%I for update using(exists(select 1 from public.%I p where p.id = %I and public.is_company_member(p.company_id)))', child || '_member_update', child, parent, fk);
-    execute format('create policy %I on public.%I for delete using(exists(select 1 from public.%I p where p.id = %I and public.has_company_role(p.company_id, array[''owner'',''admin'']::user_role[])))', child || '_admin_delete', child, parent, fk);
+    execute format('create policy %I on public.%I for select to authenticated using(exists(select 1 from public.%I p where p.id = %I and public.is_company_member(p.company_id)))', child || '_member_read', child, parent, fk);
+    execute format('create policy %I on public.%I for insert to authenticated with check(exists(select 1 from public.%I p where p.id = %I and public.is_company_member(p.company_id)))', child || '_member_insert', child, parent, fk);
+    execute format('create policy %I on public.%I for update to authenticated using(exists(select 1 from public.%I p where p.id = %I and public.is_company_member(p.company_id)))', child || '_member_update', child, parent, fk);
+    execute format('create policy %I on public.%I for delete to authenticated using(exists(select 1 from public.%I p where p.id = %I and public.has_company_role(p.company_id, array[''owner'',''admin'']::user_role[])))', child || '_admin_delete', child, parent, fk);
   end loop;
 end $$;
-
-grant execute on function public.next_document_number(uuid, text) to authenticated;
-grant execute on function public.register_stock_movement(uuid, uuid, stock_movement_type, numeric, text) to authenticated;

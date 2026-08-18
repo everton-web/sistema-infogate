@@ -10,4 +10,5 @@ begin
   insert into public.company_users(company_id,user_id,role,is_active) values(result,auth.uid(),'owner',true);
   return result;
 end $$;
+revoke execute on function public.bootstrap_company(text,text) from public, anon, authenticated;
 grant execute on function public.bootstrap_company(text,text) to authenticated;
