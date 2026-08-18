@@ -1,0 +1,3 @@
+import{Sidebar}from"@/components/sidebar";import{getAppContext}from"@/lib/auth";import{logout}from"@/app/login/actions";
+export const dynamic="force-dynamic";
+export default async function DashboardLayout({children}:{children:React.ReactNode}){const{company,user}=await getAppContext();return <div className="shell"><Sidebar/><div className="main"><header className="topbar"><div><strong>{company.trade_name||company.name}</strong><div className="muted" style={{fontSize:12}}>{user.email}</div></div><form action={logout}><button className="btn btn-secondary">Sair</button></form></header><main className="content">{children}</main></div></div>}

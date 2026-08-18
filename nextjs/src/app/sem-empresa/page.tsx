@@ -1,0 +1,1 @@
+import{logout}from"../login/actions";export default function NoCompanyPage(){return <main className="login-page"><section className="card login-card"><h1>Usuário sem empresa</h1><p className="muted">Peça a um administrador para associar este usuário a uma empresa ativa.</p><form action={logout}><button className="btn btn-secondary">Sair</button></form></section></main>}
