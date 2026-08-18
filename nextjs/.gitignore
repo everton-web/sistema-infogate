@@ -38,6 +38,9 @@ legacy-export.json
 # vercel
 .vercel
 
+# Supabase CLI local metadata
+/supabase/.temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
