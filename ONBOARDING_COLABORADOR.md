@@ -184,10 +184,18 @@ O Codex lê `AGENTS.md` automaticamente e usa as regras do repositório para ori
 Antes de começar uma tarefa:
 
 ```powershell
+git status --short
 git switch main
-git pull --ff-only
+git fetch origin
+git pull --ff-only origin main
 git switch -c feature/descricao-curta
 ```
+
+Se `git status --short` mostrar arquivos alterados, não faça pull ou rebase automaticamente. Primeiro finalize, guarde ou combine essas alterações com o responsável. Nunca use `reset --hard` apenas para “atualizar” o projeto.
+
+Ao trabalhar com o Codex, você pode pedir:
+
+> Antes de editar, verifique o estado do Git e busque atualizações do `origin`. Se estiver limpo, sincronize a `main` usando apenas fast-forward e crie uma branch para a tarefa. Se houver alterações locais ou divergência, preserve tudo e me informe antes de continuar.
 
 Exemplo de solicitação ao Codex:
 

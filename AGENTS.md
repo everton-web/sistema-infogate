@@ -24,6 +24,15 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Toda alteração de schema deve possuir uma migration em `supabase/migrations`.
 - Não execute migrations remotas nem altere produção sem autorização explícita.
 
+## Sincronização antes de qualquer tarefa
+
+- Antes de editar qualquer arquivo, execute `git status --short` e `git fetch origin`.
+- Se houver alterações locais, não execute pull, rebase, reset, checkout destrutivo ou qualquer comando que possa sobrescrevê-las. Preserve o trabalho e informe a situação antes de sincronizar.
+- Se a árvore estiver limpa e a tarefa ainda não tiver uma branch, sincronize a `main` com `git switch main` e `git pull --ff-only origin main`; depois crie uma branch curta (`feature/...`, `fix/...` ou `docs/...`).
+- Se já estiver em uma branch de tarefa, compare-a com `origin/main` antes de começar. Não reescreva uma branch compartilhada ou já publicada sem autorização explícita.
+- Antes do push, execute novamente `git fetch origin` e verifique se a branch divergiu. Resolva qualquer divergência sem apagar alterações locais.
+- O GitHub não é sincronização em tempo real: buscar atualizações no início de cada tarefa e antes do push é o fluxo padrão.
+
 ## Implementação
 
 - Antes de editar, inspecione os arquivos envolvidos e preserve mudanças existentes do usuário.
