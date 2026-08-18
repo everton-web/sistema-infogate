@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema InfoGate
 
-## Getting Started
+Aplicação de gestão comercial da Canal Som, construída com Next.js, TypeScript e Supabase e publicada pela Vercel.
 
-First, run the development server:
+## Ambiente local
 
-```bash
+```powershell
+npm install
+Copy-Item .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O sistema fica disponível em [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Validação obrigatória
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```powershell
+npm run typecheck
+npm run lint
+npm run build
+```
 
-## Learn More
+## Estrutura principal
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app`: páginas, layouts, ações e rotas da aplicação.
+- `src/components`: componentes reutilizáveis e gerenciadores dos módulos.
+- `src/lib`: autenticação, contexto da empresa e clientes Supabase.
+- `supabase/migrations`: histórico revisável da estrutura do banco.
+- `public`: imagens e recursos visuais públicos.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Colaboradores
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Leia o [guia completo de onboarding](./ONBOARDING_COLABORADOR.md) antes da primeira alteração. Ele inclui GitHub, Supabase, ambiente local, Codex, Pull Requests e deploy.
 
-## Deploy on Vercel
+## Produção
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Repositório: [everton-web/sistema-infogate](https://github.com/everton-web/sistema-infogate)
+- Aplicação: [sistema-infogate.vercel.app](https://sistema-infogate.vercel.app)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Alterações entram por Pull Request. O merge na branch `main` dispara o deploy de produção.
